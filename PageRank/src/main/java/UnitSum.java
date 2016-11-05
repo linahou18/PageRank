@@ -49,5 +49,4 @@ public class UnitSum {
 
         job.waitForCompletion(true);
     }
-
 }

@@ -79,6 +79,4 @@ public class UnitMultiplication {
 
         job.waitForCompletion(true);
     }
-
-
 }

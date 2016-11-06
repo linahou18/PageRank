@@ -41,6 +41,15 @@ public class UnitMultiplication {
     }
 
     public static class MultiplicationReducer extends Reducer<Text, Text, Text, Text> {
+
+        float beta;
+
+        @Override
+        protected void setup(Context context) throws IOException, InterruptedException {
+            Configuration conf = context.getConfiguration();
+            beta = conf.getFloat("beta", 0.2f);
+        }
+
         @Override
         protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             List<String> transitionUnits = new ArrayList<String>();
@@ -55,7 +64,7 @@ public class UnitMultiplication {
             for (String transUnit : transitionUnits) {
                 String outputKey = transUnit.split("=")[0];
                 double transVal = Double.parseDouble(transUnit.split("=")[1]);
-                String outputValue = String.valueOf(prUnit * transVal);
+                String outputValue = String.valueOf(prUnit * transVal * (1 - beta));
                 context.write(new Text(outputKey), new Text(outputValue));
             }
         }
@@ -63,7 +72,8 @@ public class UnitMultiplication {
 
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
-        Job job = Job.getInstance();
+        conf.setFloat("beta", Float.parseFloat(args[3]));
+        Job job = Job.getInstance(conf);
         job.setJarByClass(UnitMultiplication.class);
 
         ChainMapper.addMapper(job, TransitionMapper.class, Object.class, Text.class, Text.class, Text.class, conf);
